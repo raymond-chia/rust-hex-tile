@@ -6,26 +6,26 @@ use std::ops::{BitAnd, Neg};
 
 pub use crate::shared::coordinate::*;
 
-pub fn point_to_offset<I, F>(size: (F, F), point: (F, F)) -> Offset<I>
+pub fn convert_point_to_offset<I, F>(size: (F, F), point: (F, F)) -> Offset<I>
 where
     I: 'static + num::Num + BitAnd<Output = I> + Neg<Output = I> + Copy,
     F: num::Float + num::cast::AsPrimitive<I>,
 {
-    return axial_to_offset(point_to_axial(size, point));
+    return convert_axial_to_offset(convert_point_to_axial(size, point));
 }
 
-pub fn offset_to_point<I, F>(size: (F, F), offset: Offset<I>) -> (F, F)
+pub fn convert_offset_to_point<I, F>(size: (F, F), offset: Offset<I>) -> (F, F)
 where
     I: num::Num + BitAnd<Output = I> + num::cast::AsPrimitive<F>,
     F: 'static + num::Float,
 {
-    return axial_to_point(size, offset_to_axial(offset));
+    return convert_axial_to_point(size, convert_offset_to_axial(offset));
 }
 
-// we use even-q with y inversed
+// convert_point_to_axial uses even-q with y inversed
 // https://www.redblobgames.com/grids/hexagons/#size-and-spacing
 // https://www.redblobgames.com/grids/hexagons/#hex-to-pixel
-pub fn point_to_axial<I, F>(size: (F, F), point: (F, F)) -> Axial<I>
+pub fn convert_point_to_axial<I, F>(size: (F, F), point: (F, F)) -> Axial<I>
 where
     I: 'static + num::Num + Neg<Output = I> + Copy,
     F: num::Float + num::cast::AsPrimitive<I>,
@@ -35,10 +35,10 @@ where
     let r = point.1 / size.1;
     let r = r - q / (one + one); // every q contributes half y
 
-    return round::axial_round(Axial { q, r });
+    return round::round_axial(Axial { q, r });
 }
 
-pub fn axial_to_point<I, F>(size: (F, F), axial: Axial<I>) -> (F, F)
+pub fn convert_axial_to_point<I, F>(size: (F, F), axial: Axial<I>) -> (F, F)
 where
     I: num::Num + num::cast::AsPrimitive<F>,
     F: 'static + num::Float,
@@ -54,7 +54,7 @@ where
 }
 
 // https://www.redblobgames.com/grids/hexagons/#conversions-offset
-pub fn axial_to_offset<T>(axial: Axial<T>) -> Offset<T>
+pub fn convert_axial_to_offset<T>(axial: Axial<T>) -> Offset<T>
 where
     T: num::Num + BitAnd<Output = T> + Copy,
 {
@@ -64,7 +64,7 @@ where
     return Offset { q, r };
 }
 
-pub fn offset_to_axial<T>(offset: Offset<T>) -> Axial<T>
+pub fn convert_offset_to_axial<T>(offset: Offset<T>) -> Axial<T>
 where
     T: num::Num + BitAnd<Output = T> + Copy,
 {
@@ -87,19 +87,19 @@ mod test {
 
     fn assert_cases(cases: &Vec<Case>) {
         cases.iter().for_each(|case| {
-            let offset = point_to_offset(TILE_SIZE, case.translation);
+            let offset = convert_point_to_offset(TILE_SIZE, case.translation);
             assert_eq!(
                 offset, case.exp,
                 "input translation: {:?}",
                 case.translation
             );
 
-            let axial = offset_to_axial(offset);
-            let offset = axial_to_offset(axial);
+            let axial = convert_offset_to_axial(offset);
+            let offset = convert_axial_to_offset(axial);
             assert_eq!(offset, case.exp, "axial: {:?}, offset: {:?}", axial, offset);
 
-            let point = offset_to_point(TILE_SIZE, offset);
-            let offset = point_to_offset(TILE_SIZE, point);
+            let point = convert_offset_to_point(TILE_SIZE, offset);
+            let offset = convert_point_to_offset(TILE_SIZE, point);
             assert_eq!(offset, case.exp)
         });
     }

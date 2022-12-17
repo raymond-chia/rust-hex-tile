@@ -2,7 +2,7 @@ use crate::{shared::coordinate::*, structs::*};
 use std::ops::Neg;
 
 // https://www.redblobgames.com/grids/hexagons/#rounding
-pub fn cube_round<I, F>(frac: Cube<F>) -> Cube<I>
+pub fn round_cube<I, F>(frac: Cube<F>) -> Cube<I>
 where
     I: 'static + num::Num + Neg<Output = I> + Copy,
     F: num::Float + num::cast::AsPrimitive<I>,
@@ -31,10 +31,10 @@ where
     return Cube { q, r, s };
 }
 
-pub fn axial_round<I, F>(axial: Axial<F>) -> Axial<I>
+pub fn round_axial<I, F>(axial: Axial<F>) -> Axial<I>
 where
     I: 'static + num::Num + Neg<Output = I> + Copy,
     F: num::Float + num::cast::AsPrimitive<I>,
 {
-    return cube_to_axial(cube_round(axial_to_cube(axial)));
+    return convert_cube_to_axial(round_cube(convert_axial_to_cube(axial)));
 }

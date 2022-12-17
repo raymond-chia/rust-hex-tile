@@ -2,14 +2,14 @@ use crate::structs::*;
 use std::ops::{Add, Neg, Sub};
 
 // https://www.redblobgames.com/grids/hexagons/#conversions-axial
-pub fn cube_to_axial<T>(cube: Cube<T>) -> Axial<T> {
+pub fn convert_cube_to_axial<T>(cube: Cube<T>) -> Axial<T> {
     let q = cube.q;
     let r = cube.r;
     return Axial { q, r };
 }
 
 // https://www.redblobgames.com/grids/hexagons/#conversions-axial
-pub fn axial_to_cube<T>(axial: Axial<T>) -> Cube<T>
+pub fn convert_axial_to_cube<T>(axial: Axial<T>) -> Cube<T>
 where
     T: num::Num + Neg<Output = T> + Copy,
 {
